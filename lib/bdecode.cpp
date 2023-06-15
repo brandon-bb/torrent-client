@@ -1,6 +1,6 @@
 #include <bdecode.hpp>
 
-int torrent::bdecode::colonIndex (int index) { return index; }
+
 
 std::string torrent::bdecode::readFile (std::string filepath) 
 {
