@@ -23,19 +23,13 @@ std::string torrent::bdecode::read_file (std::string filepath)
 
 bool torrent::bdecode::validate_bencode (std::string bencode)
 {
-  /******VALID BENCODE******
-  - utf8-encoded
-  - formatting of types -  relevant error code
-  */
-  
+  return false; 
 }
 
 std::string torrent::bdecode::decode_string (std::string input)
 {
   std::string result = "";
-  std::vector<int> variables = length_and_string(input);
-  int length = variables[0];
-  int c = variables[1];
+  int length = decode_integer (input, true);
 
   while (length) 
   {
@@ -45,7 +39,6 @@ std::string torrent::bdecode::decode_string (std::string input)
   }
 
   return result;
-  //
 }
 
 std::int64_t torrent::bdecode::decode_integer (std::string input, bool is_string = false)
