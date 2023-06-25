@@ -14,16 +14,18 @@ namespace torrent
 class bdecode final
 {
 public:
-    std::string readFile (std::string filepath);
-    std::string decodeString (std::string input);
-    std::int64_t decodeInt (std::string input);
-    std::vector<int> length_and_string (std::string input); //helper function to return length of string and colon index in string
-    std::vector<std::any> decodeList (std::string input);
-    std::map<std::any, std::any> decodeDictionary (std::string input);
+  std::string read_file (std::string filepath);
+  bool validate_bencode (std::string bencode);
+  bool validate_utf8 (); //https://stackoverflow.com/questions/28270310/how-to-easily-detect-utf8-encoding-in-the-string
+  std::string decode_string (std::string input);
+  std::int64_t decode_integer (std::string input, bool is_string);
+  std::vector<std::any> decode_list (std::string input);
+  std::map<std::any, std::any> decode_dictionary (std::string input);
     
-    std::string to_string () const;
+  std::string to_string () const;
 
 public:
-    const std::string bdecode;
+  const std::string bdecode;
+
 };
 }

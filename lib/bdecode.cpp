@@ -1,110 +1,121 @@
 #include <bdecode.hpp>
 
 
-
-std::string torrent::bdecode::readFile (std::string filepath) 
+std::string torrent::bdecode::read_file (std::string filepath) 
 {
-    std::string result;
-    std::ifstream input;
+  std::string result;
+  std::ifstream input;
 
-    if (input)
+  if (input)
+  {
+    while (!input.eof())
     {
-        while (!input.eof())
-        {
-            std::getline (input, result);
-        }
+        std::getline (input, result);
     }
+  }
 
-    return result;
+  return result;
+
+  //error for file not exisiting
+  //error for file not being a .torrent file
+  //error for contents not being utf-8 encoded
 }
 
-/*
-helper function to deduce the length of a string
-first result is length, second is colon index
-*/
-std::vector<int> torrent::bdecode::length (std::string input)
+bool torrent::bdecode::validate_bencode (std::string bencode)
 {
+  /******VALID BENCODE******
+  - utf8-encoded
+  - formatting of types -  relevant error code
+  */
+  
+}
+
+std::string torrent::bdecode::decode_string (std::string input)
+{
+  std::string result = "";
+  std::vector<int> variables = length_and_string(input);
+  int length = variables[0];
+  int c = variables[1];
+
+  while (length) 
+  {
+    result += input[c];
+    c++;
+    length--;
+  }
+
+  return result;
+  //
+}
+
+std::int64_t torrent::bdecode::decode_integer (std::string input, bool is_string = false)
+{
+  std::string integer;
+  int i = 0;
+
+  /*****decoding string length errors*******
+   * no colon present
+   * non-numeric characters
+   * leading zero
+   * -0
+  */
+  //error code if no colon present
+  if (is_string)
+  {
     bool numeric = true;
-    uint8_t i = 0;
-    std::vector<int> result;
-    std::string len;
-
-
+    
     while (numeric)
     {
-        if (isdigit (input[i]) ) {
-            len += input[i];
-        }
+      if (isdigit(input[i]))
+      {
+      integer += input[i];
+      i++;
+      }
 
-        else 
-        {
-            result.push_back(std::stoi(len));
-            result.push_back(colonIndex(i));
-            numeric = false;
-        }
+      else
+      {
+        numeric = false;
+      }
     }
 
-    return result;
+    is_string = false;
+  }
+
+
+
+  /*****bencoded integer errors*****
+   * non-numeric characters
+   * no value between ie
+   * -0
+   * leading zeros
+  */
+  while (input[i] != 'e')
+  {
+    integer += input[i];
+    i++;
+  }
+
+  return std::stoi(integer);
 }
 
-std::string torrent::bdecode::decodeString (std::string input)
+std::vector<std::any> torrent::bdecode::decode_list(std::string input)
 {
-    std::string result;
-    std::vector<int> values = length(input);
-    int len = values[0];
-    int c = values[1] + 1; //we know location of colon so we can exclude it
+  std::vector<std::any> result;
+  int i = 0;
 
-    while (len) 
-    {
-        result += input[c];
-        c++;
-        len--;
-    }
-
-    return result;
+  return result;
+  //error code for improper format
 }
 
-std::int64_t torrent::bdecode::decodeInt (std::string input)
+std::map<std::any, std::any> torrent::bdecode::decode_dictionary (std::string input)
 {
-    std::string result;
-    int i = 1; //we ignore the "i" delimiter
+  std::map<std::any, std::any> result;
+  int i = 0;
 
-    while (input[i] != 'e')
-    {
-        result += input[i];
-        i++;
-    }
+  //find a way to detect if a pair has been made then add to dict.
 
-    return std::stoi(result);
-}
+  return result;
 
-std::vector<std::any> torrent::bdecode::decodeList (std::string input)
-{
-    std::vector<std::any> result;
-    int i = 0;
+  //similar to list
 
-    while (input[i] != 'e')
-    {
-        if (isdigit(input[i])) { result.push_back(decodeInt(input)); }
-        
-        if (input[i] == 'i') { result.push_back(decodeInt(input)); }
-
-        if (input[i] == 'd') { result.push_back(decodeDictionary(input)); }
-
-        if (input[i] == 'l') { result.push_back(decodeList(input)); }
-
-        i++;
-   }
-
-    return result;
-}
-
-std::map<std::any, std::any> torrent::bdecode::decodeDictionary (std::string input)
-{
-    std::map<std::any, std::any> result;
-    int i = 0;
-
-    //find a way to detect if a pair has been made then add to dict.
-
-    return result;
 }
