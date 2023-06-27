@@ -1,44 +1,28 @@
 #include <bdecode.hpp>
 
-
-std::string torrent::bdecode::read_file (std::string filepath) 
-{
-  std::string result;
-  std::ifstream input;
-
-  if (input)
-  {
-    while (!input.eof())
-    {
-        std::getline (input, result);
-    }
-  }
-
-  return result;
-
-  //error for file not exisiting
-  //error for file not being a .torrent file
-  //error for contents not being utf-8 encoded
-}
-
-bool torrent::bdecode::validate_bencode (std::string bencode)
-{
-  return false; 
-}
-
 std::string torrent::bdecode::decode_string (std::string input)
 {
   std::string result = "";
-  int length = decode_integer (input, true);
-
-  while (length) 
+  const int expected_length = decode_integer (input, true);
+  int string = (log10(expected_length) + 1); //number of digits in length
+  
+  if (input[string] != ':')
   {
-    result += input[c];
-    c++;
-    length--;
+    //error code - invalid bencoding, string not properly encoded
+  }
+
+  for (int i = string + 1; i < expected_length; i++)
+  {
+    result += input[i];
+  }
+
+  if (result.length() != expected_length)
+  {
+    //error code - invalid string_length, length of string does not match expected length
   }
 
   return result;
+
 }
 
 std::int64_t torrent::bdecode::decode_integer (std::string input, bool is_string = false)
@@ -47,10 +31,9 @@ std::int64_t torrent::bdecode::decode_integer (std::string input, bool is_string
   int i = 0;
 
   /*****decoding string length errors*******
-   * no colon present
-   * non-numeric characters
+   * non-numeric characters //check in loop
    * leading zero
-   * -0
+   * negative length
   */
   //error code if no colon present
   if (is_string)
@@ -97,7 +80,7 @@ std::vector<std::any> torrent::bdecode::decode_list(std::string input)
   int i = 0;
 
   return result;
-  //error code for improper format
+  //error code for improper format (end denoting)
 }
 
 std::map<std::any, std::any> torrent::bdecode::decode_dictionary (std::string input)

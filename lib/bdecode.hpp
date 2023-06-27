@@ -1,6 +1,7 @@
 #pragma once
 
 #include <system_error>
+#include <cmath>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -14,7 +15,6 @@ namespace torrent
 class bdecode final
 {
 public:
-  std::string read_file (std::string filepath);
   bool validate_bencode (std::string bencode);
   bool validate_utf8 (); //https://stackoverflow.com/questions/28270310/how-to-easily-detect-utf8-encoding-in-the-string
   std::string decode_string (std::string input);
