@@ -1,16 +1,16 @@
 #include <errors.hpp>
 
-std::string torrent::file_errors::message (int ev) const
+std::string torrent::common_errors::message (int ev) const
 {
-  switch (static_cast<torrent::file_errors> (ev))
+  switch (static_cast<torrent::common_errors> (ev))
   {
-    case torrent::file_errors::generic:
+    case torrent::common_errors::generic:
       return "Unknown error";
 
-    case torrent::file_errors::file_not_exist:
+    case torrent::common_errors::file_not_exist:
       return "File does not exist";
 
-    case torrent::file_errors::not_torrent_file:
+    case torrent::common_errors::not_torrent_file:
       return "Not a torrent file";
   }
 }
@@ -25,7 +25,7 @@ torrent::error::error (std::error_code code_arg)
   code = code_arg;
 }
 
-torrent::error::error (std::error_code message_arg)
+torrent::error::error (std::string message_arg)
 {
   //code = torrent::common_errors::generic;
   message = std::move (message_arg);
@@ -102,7 +102,7 @@ torrent::error::operator bool () const
   return code.value () != 0;
 }
 
-int torrent::error::error_code_as_int () const 
+int torrent::error::errcode_as_int () const 
 {
   return code.value ();
 }
