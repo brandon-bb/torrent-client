@@ -3,6 +3,7 @@
 #include <functional>
 #include <system_error>
 #include <utility>
+#include <type_traits>
 
 namespace torrent
 {
@@ -33,24 +34,32 @@ enum tracker_errors
 
 }
 
-/* **CONCEPT - NOT ACTUAL IMPLEMENTATION** at the moment the plan is to implement a template
-  that all the enums have access to, thus reducing the need to reproduce code for all the different error
+/*a template that all the enums have access to, thus reducing the need to reproduce code for all the different error
   message().
 */
 namespace torrent
 {
-  template <enum T>
+  template <typename T>
   class error_template : public std::error_category
   {
-    static_assert (static_cast<int> (T::generic) > 0, "first error enum must be generic = 1");
+    static_assert (std::is_enum<T>::value, "Must be enum");
+    static_assert (static_cast<int> (T::generic) == 1, "first error enum must be generic = 1");
 
     public:
+      T err;
+
+    public:
+      error_template (T e) : err (e) {}
+
       char const * name () const noexcept override
       {
-        return T;
+        return err;
       }
 
-    std::string message (int ev) const override;
+    std::string message (int ev) const override
+    {
+      return torrent::err::message (ev);
+    }
   };
 }
 

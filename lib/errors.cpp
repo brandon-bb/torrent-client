@@ -17,7 +17,29 @@ std::string torrent::common_errors::message (int ev) const
 
 std::string torrent::bencode_errors::message (int ev) const
 {
+  switch (static_cast<torrent::bencode_errors> (ev))
+  {
+    case torrent::bencode_errors::generic:
+      return "Unknown error";
 
+    case torrent::bencode_errors::invalid_bencoding:
+      return "File has invalid bencode format";
+
+    case torrent::bencode_errors::invalid_utf8:
+      return "File not encoded in UTF-8";
+
+    case torrent::bencode_errors::leading_zero:
+      return "Integer has leading zero";
+
+    case torrent::bencode_errors::no_integer_value:
+      return "No integer value encoded";
+
+    case torrent::bencode_errors::non_numeric:
+      return "Non-numeric character present in integer encoding";
+
+    case torrent::bencode_errors::invalid_string_length:
+      return "Given string does not match the given length";
+  }
 }
 
 torrent::error::error (std::error_code code_arg)
