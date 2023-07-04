@@ -1,14 +1,17 @@
 #include <bdecode.hpp>
+#include <errors.hpp>
 
 std::string torrent::bdecode::decode_string (std::string input)
 {
   std::string result = "";
   const int expected_length = decode_integer (input, true);
-  int string = (log10(expected_length) + 1); //number of digits in length
+  int expected_char = (log10(expected_length) + 2) ; //number of digits in length - indicates where the string starts
   
-  if (input[string] != ':')
+  if (input[expected_char] != ':')
   {
-    //error code - invalid bencoding, string not properly encoded
+    //invalid bencoding
+    return ec = static_cast<bencode_errors> (2);
+    //append explanation of this error
   }
 
   for (int i = string + 1; i < expected_length; i++)
@@ -19,60 +22,62 @@ std::string torrent::bdecode::decode_string (std::string input)
   if (result.length() != expected_length)
   {
     //error code - invalid string_length, length of string does not match expected length
+    return ec = static_cast<bencode_errors> (7);
   }
 
   return result;
 
 }
 
+/*
+This can be improved but it is a start.
+
+decoding integers & string lengths operate similar but the
+difference is that a string cannot have a negative length.
+
+The bool flag in the function is used as an indicator to detect if a negative value
+has been attached to a string - if so, we return an error.
+
+As it is possible that a .torrent file could have a string like this -> "-:fooled you"
+(correct format is 10:fooled you)
+we check for this edge case before converting to integer.
+*/
 std::int64_t torrent::bdecode::decode_integer (std::string input, bool is_string = false)
 {
   std::string integer;
   int i = 0;
 
-  /*****decoding string length errors*******
-   * non-numeric characters //check in loop
-   * leading zero
-   * negative length
-  */
-  //error code if no colon present
-  if (is_string)
+  while (input[i] != ':')
   {
-    bool numeric = true;
-    
-    while (numeric)
+    if (i == 0 && input[i] == '-')
     {
-      if (isdigit(input[i]))
-      {
-      integer += input[i];
-      i++;
-      }
-
-      else
-      {
-        numeric = false;
+      if (is_string)
+      { 
+        return ec = static_cast<bencode_errors> (7); 
       }
     }
 
-    is_string = false;
-  }
+    //handles -0 or leading zero
+    else if ((i == 1 && negative_char == true)  || (i == 0 && input[i] == '0'))
+    {
+      return ec = static_cast<bencode_errors> (4);
+    }
 
 
+    else if (isdigit (input[i]) == false)
+    {
+      return ec = static_cast<bencode_errors> (6);
+    }
 
-  /*****bencoded integer errors*****
-   * non-numeric characters
-   * no value between ie
-   * -0
-   * leading zeros
-  */
-  while (input[i] != 'e')
-  {
     integer += input[i];
     i++;
   }
 
-  return std::stoi(integer);
+  if (integer == "-") { return ec = static_cast<bencode_errors> (6); }
+
+  return std::stoi (integer);
 }
+
 
 std::vector<std::any> torrent::bdecode::decode_list(std::string input)
 {

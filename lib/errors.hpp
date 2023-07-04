@@ -24,7 +24,7 @@ enum class bencode_errors
   leading_zero,
   no_integer_value,
   non_numeric,
-  invalid_string_length,
+  inconsistent_string_length,
 };
 
 enum tracker_errors
@@ -58,7 +58,7 @@ namespace torrent
 
       std::string message (int ev) const override
       {
-        return torrent::err::message (ev);
+        return err.message (ev);
       }
   };
 }
@@ -92,7 +92,7 @@ public:
 	int error_code_as_int () const;
 	error & on_error (std::string message_arg);
 	error & on_error (std::error_code code_arg, std::string message_arg);
-	error & set (std::string message_arg, std::error_code code_arg = nano::common_errors::generic);
+	error & set (std::string message_arg, std::error_code code_arg = torrent::common_errors::generic);
 	error & set_message (std::string message_arg);
 	error & clear ();
 

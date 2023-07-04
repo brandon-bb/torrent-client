@@ -37,7 +37,7 @@ std::string torrent::bencode_errors::message (int ev) const
     case torrent::bencode_errors::non_numeric:
       return "Non-numeric character present in integer encoding";
 
-    case torrent::bencode_errors::invalid_string_length:
+    case torrent::bencode_errors::inconsistent_string_length:
       return "Given string does not match the given length";
   }
 }
@@ -158,7 +158,7 @@ torrent::error & torrent::error::on_error (std::string message_arg)
 
 torrent::error & torrent::error::on_error (std::error_code code_arg, std::string message_arg)
 {
-  if (code == code_arg)
+  if (code = code_arg)
   {
     message = std::move (message_arg);
   }
@@ -166,7 +166,7 @@ torrent::error & torrent::error::on_error (std::error_code code_arg, std::string
   return *this;
 }
 
-torrent::error & torrent::error::set (std::string message_arg, std::error_code code_arg = nano::common::generic)
+torrent::error & torrent::error::set (std::string message_arg, std::error_code code_arg = torrent::common::generic)
 {
   code = code_arg;
   message = std::move (message_arg);

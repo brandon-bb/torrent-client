@@ -26,6 +26,7 @@ public:
 
 public:
   const std::string bdecode;
+  std::error_code ec;
 
 };
 }
