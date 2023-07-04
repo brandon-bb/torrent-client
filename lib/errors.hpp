@@ -56,10 +56,10 @@ namespace torrent
         return err;
       }
 
-    std::string message (int ev) const override
-    {
-      return torrent::err::message (ev);
-    }
+      std::string message (int ev) const override
+      {
+        return torrent::err::message (ev);
+      }
   };
 }
 
