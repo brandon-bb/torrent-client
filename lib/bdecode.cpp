@@ -1,7 +1,7 @@
 #include <bdecode.hpp>
 #include <errors.hpp>
 
-std::string torrent::bdecode::decode_string (std::string input)
+std::string torrent::bdecode::decode_string (std::string input, int i = 0)
 {
   std::string result = "";
   const int expected_length = decode_integer (input, true);
@@ -42,14 +42,14 @@ As it is possible that a .torrent file could have a string like this -> "-:foole
 (correct format is 10:fooled you)
 we check for this edge case before converting to integer.
 */
-std::int64_t torrent::bdecode::decode_integer (std::string input, bool is_string = false)
+std::int64_t torrent::bdecode::decode_integer (std::string input, bool is_string, int i = 0)
 {
   std::string integer;
-  int i = 0;
+  int start = i;
 
-  while (input[i] != ':')
+  while (input[i] != ':' || 'e')
   {
-    if (i == 0 && input[i] == '-')
+    if (i == start && input[i] == '-')
     {
       if (is_string)
       { 
@@ -78,22 +78,62 @@ std::int64_t torrent::bdecode::decode_integer (std::string input, bool is_string
   return std::stoi (integer);
 }
 
-
-std::vector<std::any> torrent::bdecode::decode_list(std::string input)
+/*
+need to revise the solutions for decode_list/dict to handle the edge case
+of no end symbol.
+this would be a corrupt file as the decoding process would assume every
+entry belongs to the list when in reality there just isn't an end signifier
+*/
+std::vector<std::any> torrent::bdecode::decode_list (std::string input, int i = 0)
 {
-  std::vector<std::any> result;
-  int i = 0;
+  std::vector<std::any> result = {};
+
+  while (input[i] != 'e')
+  {
+    if (input[i] == 'l') { result.push_back (decode_list (input)); }
+
+    if (input[i] == 'd') { result.push_back (decode_dictionary (input)); }
+
+    if (isdigit(input[i])) { result.push_back (decode_string (input)); }
+
+    if (input[i] == 'i') { result.push_back (decode_integer (input)); }
+
+    i++;
+  }
 
   return result;
   //error code for improper format (end denoting)
 }
 
-std::map<std::any, std::any> torrent::bdecode::decode_dictionary (std::string input)
+std::map<std::any, std::any> torrent::bdecode::decode_dictionary (std::string input, int i = 0)
 {
-  std::map<std::any, std::any> result;
-  int i = 0;
+  std::map<std::any, std::any> result = {};
+  bool is_key = true;
+  std::string temp_key; //temporarily holds current key that needs a pair
 
-  //find a way to detect if a pair has been made then add to dict.
+  //add error message if key has no pair
+  
+  while (input[i] != 'e')
+  {
+    std::string current = decode_string (input);
+    
+    if (is_key)
+    {
+      temp_key = current;
+      is_key = false;
+    }
+
+    else
+    {
+      result.insert (std::pair<std::string, std::string> (temp_key, current));
+      is_key = true;
+    }
+
+    i++;
+  }
+
+
+  
 
   return result;
 
