@@ -65,7 +65,17 @@
     "typeindex": "cpp",
     "typeinfo": "cpp",
     "variant": "cpp",
-    "semaphore": "cpp"
+    "semaphore": "cpp",
+    "csignal": "cpp",
+    "codecvt": "cpp",
+    "coroutine": "cpp",
+    "source_location": "cpp",
+    "future": "cpp",
+    "iomanip": "cpp",
+    "shared_mutex": "cpp",
+    "expected": "cpp",
+    "format": "cpp",
+    "*.ipp": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }
