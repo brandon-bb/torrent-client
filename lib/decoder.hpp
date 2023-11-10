@@ -70,4 +70,6 @@ private:
   const std::string encoded_value;
   std::string::iterator decode_iterator;
   std::map<std::string, Metadata> torrent_metadata;
+};
+
 }
