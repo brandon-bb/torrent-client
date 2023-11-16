@@ -14,17 +14,16 @@
 namespace TorrentLib {
 
 struct Metadata;
-using list = std::vector<Metadata>;
-using dict = std::map<std::string, Metadata>;
 
 struct Metadata {
-  std::variant <int64_t, std::string, list, dict> value;
+  std::variant <int64_t, std::string, std::vector<Metadata>, 
+    std::unordered_map<std::string, Metadata>> value;
 
   Metadata ();
   Metadata (const int64_t& data) : value (data) {}
   Metadata (const std::string& data) : value (data) {}
   Metadata (const std::vector<Metadata>& store) : value (store) {}
-  Metadata (const std::map<std::string, Metadata>& store) : value (store) {}
+  Metadata (const std::unordered_map<std::string, Metadata>& store) : value (store) {}
 };
 
 /*
@@ -46,6 +45,7 @@ using metadata_object = std::expected<Metadata, TorrentError<Error::DecodeError>
 public:
   Decoder (const std::string& value);
   Decoder (const std::filesystem::path& filepath);
+  ~Decoder();
 
 private:
   template <typename T, typename E, typename Container, typename KeyType>
@@ -63,13 +63,19 @@ private:
   auto DecodeList () -> std::expected<Metadata, TorrentError<Error::DecodeError>>;
   auto DecodeDict () -> std::expected<Metadata, TorrentError<Error::DecodeError>>;
   
-  std::string to_string () const;
+  std::string ToString () const;
 
 
 private:
   const std::string encoded_value;
   std::string::iterator decode_iterator;
-  std::map<std::string, Metadata> torrent_metadata;
+  std::unordered_map<std::string, Metadata> torrent_metadata;
+  
+  using variant_type = std::variant <int64_t, std::string, std::vector<Metadata>, 
+    std::unordered_map<std::string, Metadata>>;
+
+  template <typename T>
+  void Visit (const variant_type& variant, std::stack<std::string>& context_stack, std::string& result);
 };
 
 }

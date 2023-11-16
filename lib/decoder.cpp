@@ -57,7 +57,7 @@ const void Decoder::InsertValue (const std::expected<T, E>& input, Container& co
       container.push_back (*input);
     }
 
-    else if constexpr (std::is_same_v<Container, std::map<std::string, T>>) {
+    else if constexpr (std::is_same_v<Container, std::unordered_map<std::string, T>>) {
       if constexpr (std::is_same_v<KeyType, std::string>) {
         if (key.has_value () && ValidKey (key)) { 
           const std::string extracted_key = ExtractKey (key);
@@ -249,7 +249,7 @@ auto Decoder::DecodeList () -> std::expected<Metadata, TorrentError<Error::Decod
 // similar approach to decode_list
 auto Decoder::DecodeDict () -> std::expected<Metadata, TorrentError<Error::DecodeError>>
 {
-  std::map <std::string, Metadata> decoded_dict;
+  std::unordered_map <std::string, Metadata> decoded_dict;
   std::stack <char> stack;
 
 
@@ -328,6 +328,58 @@ auto Decoder::DecodeDict () -> std::expected<Metadata, TorrentError<Error::Decod
   }
 
   return Metadata (decoded_dict);
+}
+
+//make a Metadata visitor class in resource manager
+//roughish draft, but an attempt to convert our types to string for easier debugging
+template<typename T>
+void Decoder::Visit (const T& value, std::stack<std::string>& context_stack, std::string& result) 
+{
+  if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, std::string) {
+    if (!context_stack.empty ()) {
+      result += context_stack.top() + ": ";
+    }
+
+    result += std::to_string (value);
+  }
+
+  else if constexpr (std::is_same_v<T, std::vector<Metadata>>) {
+    result += "[";
+
+    for (auto it = value.begin(); it != value.end(); it++) {
+      visit(*it, context_stack, result);
+
+      if (std::next(it) != value.end()) {
+        result += ", ";
+      }
+    }
+
+    result += "] ";
+  }
+
+  else if constexpr (std::is_same_v<T, std::unordered_map<std::string, Metadata>>) {
+    result += "{";
+
+    for (auto it = value.begin(); it != value.end(); it++) {
+      result += it->first + ": ";
+      Visit(it->second, context_stack, result);
+
+      if (std::next(it) != value.end()) {
+        result += ", ";
+      }
+    }
+
+    result += "} ";
+  }
+}
+
+
+//logging
+std::string Decoder::ToString () const 
+{
+  std::string output;
+
+  return output;
 }
 
 }

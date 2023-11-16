@@ -24,7 +24,6 @@ class Monitor {
 
   private:
     T& resource_;
-    ResourceType type_;
     std::function<void()> callback_;
     std::thread thread_;
     std::mutex mutex_;
