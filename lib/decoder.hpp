@@ -13,19 +13,6 @@
 
 namespace TorrentLib {
 
-struct Metadata;
-
-struct Metadata {
-  std::variant <int64_t, std::string, std::vector<Metadata>, 
-    std::unordered_map<std::string, Metadata>> value;
-
-  Metadata ();
-  Metadata (const int64_t& data) : value (data) {}
-  Metadata (const std::string& data) : value (data) {}
-  Metadata (const std::vector<Metadata>& store) : value (store) {}
-  Metadata (const std::unordered_map<std::string, Metadata>& store) : value (store) {}
-};
-
 /*
 * T
 */
@@ -39,8 +26,6 @@ public:
     list = 'l',
     string = '0' //can handle [0-9]
   };
-
-using metadata_object = std::expected<Metadata, TorrentError<Error::DecodeError>>;
 
 public:
   Decoder (const std::string& value);
